@@ -1,0 +1,201 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز محركات البحث الأكاديمية</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .search-engine-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .search-engine-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .filter-button {
+            transition: background-color 0.2s;
+        }
+        .filter-button.active {
+            background-color: #1f2937;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <header class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto px-4">
+            <h1 class="text-3xl font-bold">مركز محركات البحث الأكاديمية</h1>
+            <p class="mt-2">إعداد: الأستاذ ياسر محمد، مدير مكتبة كلية الخدمة الاجتماعية</p>
+            <p class="mt-2">دليل شامل لمحركات البحث الأكاديمية للطلاب والباحثين</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Introduction Section -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold mb-4">لماذا تستخدم محركات البحث الأكاديمية؟</h2>
+            <p class="text-gray-700 leading-relaxed">
+                محركات البحث الأكاديمية هي أدوات متخصصة مصممة لمساعدة الطلاب والباحثين والأكاديميين في العثور على المقالات العلمية وأوراق البحث والكتب وغيرها من الموارد الموثوقة. على عكس محركات البحث العامة، تركز هذه المنصات على المحتوى الأكاديمي والمراجع من قبل النظراء، مما يجعلها لا تقدر بثمن لإجراء البحوث، كتابة الأوراق، أو البقاء على اطلاع بمجالك. توفر هذه الصفحة قائمة منظمة بأشهر محركات البحث الأكاديمية وأكثرها فعالية، مع وصف وروابط وخيارات تصفية لمساعدتك في العثور على الأداة المناسبة لاحتياجاتك.
+            </p>
+        </section>
+
+        <!-- Filter Section -->
+        <section class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">تصفية محركات البحث</h2>
+            <div class="flex flex-wrap gap-4">
+                <button class="filter-button px-4 py-2 bg-gray-200 rounded-md" data-filter="all">الكل</button>
+                <button class="filter-button px-4 py-2 bg-gray-200 rounded-md" data-filter="general">أكاديمي عام</button>
+                <button class="filter-button px-4 py-2 bg-gray-200 rounded-md" data-filter="discipline-specific">خاص بالتخصص</button>
+                <button class="filter-button px-4 py-2 bg-gray-200 rounded-md" data-filter="open-access">الوصول المفتوح</button>
+            </div>
+        </section>
+
+        <!-- Search Engines List -->
+        <section id="search-engines" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Google Scholar -->
+            <div class="search-engine-card bg-white p-6 rounded-lg shadow-md" data-category="general">
+                <h3 class="text-xl font-semibold mb-2">جوجل سكولار</h3>
+                <p class="text-gray-600 mb-4">محرك بحث يستخدم على نطاق واسع للأدبيات العلمية عبر التخصصات، بما في ذلك المقالات والأطروحات والكتب والأوراق المؤتمرات.</p>
+                <a href="https://scholar.google.com" target="_blank" class="text-blue-600 hover:underline">زيارة جوجل سكولار</a>
+            </div>
+
+            <!-- PubMed -->
+            <div class="search-engine-card bg-white p-6 rounded-lg shadow-md" data-category="discipline-specific">
+                <h3 class="text-xl font-semibold mb-2">بوب ميد</h3>
+                <p class="text-gray-600 mb-4">مورد مجاني للأدبيات الطبية الحيوية وعلوم الحياة، يوفر الوصول إلى ملايين المقالات والملخصات.</p>
+                <a href="https://pubmed.ncbi.nlm.nih.gov" target="_blank" class="text-blue-600 hover:underline">زيارة بوب ميد</a>
+            </div>
+
+            <!-- IEEE Xplore -->
+            <div class="search-engine-card bg-white p-6 rounded-lg shadow-md" data-category="discipline-specific">
+                <h3 class="text-xl font-semibold mb-2">آي إي إي إي إكسبلور</h3>
+                <p class="text-gray-600 mb-4">مكتبة رقمية للهندسة الكهربائية وعلوم الحاسوب والإلكترونيات، مع الوصول إلى المجلات وأوراق المؤتمرات والمعايير.</p>
+                <a href="https://ieeexplore.ieee.org" target="_blank" class="text-blue-600 hover:underline">زيارة آي إي إي إي إكسبلور</a>
+            </div>
+
+            <!-- JSTOR -->
+            <div class="search-engine-card bg-white p-6 rounded-lg shadow-md" data-category="general">
+                <h3 class="text-xl font-semibold mb-2">جاي ستور</h3>
+                <p class="text-gray-600 mb-4">مكتبة رقمية للمجلات الأكاديمية والكتب والمصادر الأولية في العلوم الإنسانية والعلوم الاجتماعية والعلوم.</p>
+                <a href="https://www.jstor.org" target="_blank" class="text-blue-600 hover:underline">زيارة جاي ستور</a>
+            </div>
+
+            <!-- DOAJ -->
+            <div class="search-engine-card bg-white p-6 rounded-lg shadow-md" data-category="open-access">
+                <h3 class="text-xl font-semibold mb-2">دليل المجلات مفتوحة الوصول (DOAJ)</h3>
+                <p class="text-gray-600 mb-4">دليل يديره المجتمع للمجلات مفتوحة الوصول والمراجعة من قبل النظراء عبر التخصصات المختلفة.</p>
+                <a href="https://doaj.org" target="_blank" class="text-blue-600 hover:underline">زيارة DOAJ</a>
+            </div>
+
+            <!-- arXiv -->
+            <div class="search-engine-card bg-white p-6 rounded-lg shadow-md" data-category="open-access">
+                <h3 class="text-xl font-semibold mb-2">آركسيف</h3>
+                <p class="text-gray-600 mb-4">مستودع مجاني للأوراق المسبقة في الفيزياء والرياضيات وعلوم الحاسوب والمجالات ذات الصلة.</p>
+                <a href="https://arxiv.org" target="_blank" class="text-blue-600 hover:underline">زيارة آركسيف</a>
+            </div>
+
+            <!-- CORE -->
+            <div class="search-engine-card bg-white p-6 rounded-lg shadow-md" data-category="open-access">
+                <h3 class="text-xl font-semibold mb-2">كور</h3>
+                <p class="text-gray-600 mb-4">مجمع لأوراق البحث مفتوحة الوصول من المستودعات والمجلات في جميع أنحاء العالم.</p>
+                <a href="https://core.ac.uk" target="_blank" class="text-blue-600 hover:underline">زيارة كور</a>
+            </div>
+
+            <!-- Semantic Scholar -->
+            <div class="search-engine-card bg-white p-6 rounded-lg shadow-md" data-category="general">
+                <h3 class="text-xl font-semibold mb-2">سيمانتيك سكولار</h3>
+                <p class="text-gray-600 mb-4">محرك بحث مدعوم بالذكاء الاصطناعي للأدبيات العلمية، يقدم أدوات متقدمة لتحليل أوراق البحث.</p>
+                <a href="https://www.semanticscholar.org" target="_blank" class="text-blue-600 hover:underline">زيارة سيمانتيك سكولار</a>
+            </div>
+
+            <!-- ERIC -->
+            <div class="search-engine-card bg-white p-6 rounded-lg shadow-md" data-category="discipline-specific">
+                <h3 class="text-xl font-semibold mb-2">إريك</h3>
+                <p class="text-gray-600 mb-4">قاعدة بيانات لأبحاث التعليم والمعلومات، بما في ذلك المقالات الصحفية والتقارير وأوراق السياسات.</p>
+                <a href="https://eric.ed.gov" target="_blank" class="text-blue-600 hover:underline">زيارة إريك</a>
+            </div>
+
+            <!-- BASE -->
+            <div class="search-engine-card bg-white p-6 rounded-lg shadow-md" data-category="open-access">
+                <h3 class="text-xl font-semibold mb-2">بيس</h3>
+                <p class="text-gray-600 mb-4">محرك بحث متعدد التخصصات للموارد الأكاديمية مفتوحة الوصول، يفهرس ملايين الوثائق.</p>
+                <a href="https://www.base-search.net" target="_blank" class="text-blue-600 hover:underline">زيارة بيس</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto px-4 text-center">
+            <p>© 2025 مركز محركات البحث الأكاديمية. جميع الحقوق محفوظة.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Filter functionality
+        const filterButtons = document.querySelectorAll('.filter-button');
+        const searchEngineCards = document.querySelectorAll('.search-engine-card');
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                // Add active class to clicked button
+                button.classList.add('active');
+
+                const filter = button.getAttribute('data-filter');
+
+                // Show or hide cards based on filter
+                searchEngineCards.forEach(card => {
+                    const category = card.getAttribute('data-category');
+                    if (filter === 'all' || category === filter) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Set default filter to 'all'
+        document.querySelector('[data-filter="all"]').classList.add('active');
+    </script>
